@@ -1,8 +1,5 @@
-let properties = {
-  username: {
-    type: String,
-    required: true,
-  },
-};
+'use strict';
 
-loopback.Model.extend('User', properties, {});
+module.exports = function(User) {
+
+};

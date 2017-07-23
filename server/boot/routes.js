@@ -17,8 +17,8 @@ module.exports = (app) => {
    * Register user
    */
   app.post('/register', (req, res) => {
-    let User = app.models.User;
-    User.create({
+    let user = app.models.user;
+    user.create({
       email: req.body.email,
       password: req.body.password,
       username: req.body.username}, (err, userInstance) => {
@@ -26,7 +26,7 @@ module.exports = (app) => {
           title: (!err) ? 'Usuario creado con exito' : 'Hubo un problema creando el usuario',
           content: err,
           redirectTo: '/',
-          redirectToLinkText: (!err) ? 'Registro exitoso, logueese de nuevo' : '',
+          redirectToLinkText: (!err) ? 'Registro exitoso. Por favor, vuelva a loguearse de nuevo' : 'Hubo un problema intentando crear el usuario',
         });
     });
   });
@@ -35,7 +35,7 @@ module.exports = (app) => {
    * Logs a user
    */
   app.post('/login', function(req, res) {
-    let User = app.models.User;
+    let User = app.models.user;
     User.login({
       email: req.body.email,
       password: req.body.password
@@ -67,9 +67,22 @@ module.exports = (app) => {
     });
   });
 
+  app.post('/isPrime', (req, res, next) => {
+    "use strict";
+    if( !req.body.access_token ) return res.sendStatus(401);
+    if( !req.body.number ){
+      res.send({'isPrime': false });
+    }else{
+      let num = req.body.number;
+      for(var i = 2; i < num; i++)
+        if(num % i === 0) res.send({'isPrime': false });
+          res.send({'isPrime' : (num !== 1) }) ;
+    }
+  });
+
   //log a user out
   app.get('/logout', (req, res, next) => {
-    let User = app.models.User;
+    let User = app.models.user;
     if (!req.query.access_token) return res.sendStatus(401);
     User.logout(req.query.access_token, err => {
       if (err) return next(err);
