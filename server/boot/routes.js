@@ -1,6 +1,10 @@
 
 const datasource = require('../datasources.json');
 const path = require('path');
+const roles = {
+  'admin': 1,
+  'client': 2
+};
 
 module.exports = (app) => {
 
@@ -22,11 +26,20 @@ module.exports = (app) => {
       email: req.body.email,
       password: req.body.password,
       username: req.body.username}, (err, userInstance) => {
-        res.render('response', {
-          title: (!err) ? 'Usuario creado con exito' : 'Hubo un problema creando el usuario',
-          content: err,
-          redirectTo: '/',
-          redirectToLinkText: (!err) ? 'Registro exitoso. Por favor, vuelva a loguearse de nuevo' : 'Hubo un problema intentando crear el usuario',
+
+        let roleMapping = app.models.RoleMapping;
+        roleMapping.create({
+          'principalId': userInstance.id,
+          'roleId': roles.admin,
+          'principalType': 'user'
+        }, (err, roleInstance) => {
+          "use strict";
+          res.render('response', {
+            title: (!err) ? 'Usuario creado con exito' : 'Hubo un problema creando el usuario',
+            content: err,
+            redirectTo: '/',
+            redirectToLinkText: (!err) ? 'Registro exitoso. Por favor, vuelva a loguearse de nuevo' : 'Hubo un problema intentando crear el usuario',
+          });
         });
     });
   });
@@ -60,15 +73,29 @@ module.exports = (app) => {
         }
         return;
       }
-      res.render('home', {
-        email: req.body.email,
-        accessToken: token.id
+      let user = app.models.user;
+      user.findOne({'email': req.body.email }, (err, responseUser) => {
+        let roleMapping = app.models.RoleMapping.findOne({
+          'principalId': responseUser.id,
+          'principalType': 'user'
+        }, (err, responseRole) => {
+            if( responseRole.roleId === roles.admin ){
+              res.render('admin', {
+                'email': responseUser.email,
+                'accessToken': token.id
+              });
+            }else{
+              res.render('home', {
+                email: req.body.email,
+                accessToken: token.id
+              });
+            }
+        });
       });
     });
   });
 
   app.post('/isPrime', (req, res, next) => {
-    "use strict";
     if( !req.body.access_token ) return res.sendStatus(401);
     if( !req.body.number ){
       res.send({'isPrime': false });

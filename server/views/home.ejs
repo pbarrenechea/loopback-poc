@@ -1,19 +1,35 @@
+<script type="text/javascript">
+  function callIsPrime() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var response = JSON.parse(this.responseText);
+        document.getElementById("msg").innerHTML = response.isPrime ? "Si" : "No`" ;
+      }
+    };
+    xhttp.open("POST", "/isPrime", true);
+    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    var newNumber = document.getElementById("number").value;
+    var accessToken = document.getElementById("access_token").value;
+    xhttp.send("access_token=" + accessToken + "&number=" + newNumber);
+  }
+</script>
+
 <main>
   <h1>Hola <%= email %>.</h1>
   <p>Su accessToken es: <%= accessToken %></p>
   <br/>
 
   <section>
-    <form action="/isPrime" method="post">
       <legend>Verifique si el numero es primo</legend>
       <label for="number">Numero:</label>
-      <input type="text" name="number" value=""/>
+      <input type="text" id="number" value=""/>
       </div>
-      <input type="hidden" name="access_token" value="<%= accessToken %>"/>
+      <input type="hidden" id="access_token" value="<%= accessToken %>"/>
       <div>
-        <input type="submit" value="Es primo?"/>
+        <button onclick="callIsPrime()"> Es Primo? </button> &nbsp;&nbsp; <div id="msg"></div>
       </div>
-    </form>
+
   </section>
   <br/>
   <a href="/logout?access_token=<%= accessToken %>">Log out</a>

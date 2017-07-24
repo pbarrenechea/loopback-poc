@@ -1,0 +1,29 @@
+
+<main>
+  <h1>Hola <%= email %>.</h1>
+  <p>Su accessToken es: <%= accessToken %></p>
+  <br/>
+
+  <section>
+    <legend>Crear nuevo usuario administrador</legend>
+    <div>
+      <label for="number">Numero:</label>
+      <input type="text" id="username" value=""/>
+    </div>
+    <div>
+      <label for="email">Email:</label>
+      <input type="text" id="email" value=""/>
+    </div>
+    <div>
+      <label for="email">Password:</label>
+      <input type="password" id="password" value=""/>
+    </div>
+    <input type="hidden" id="access_token" value="<%= accessToken %>"/>
+    <div>
+      <button onclick="insertAdminUser()"> Crear </button>
+    </div>
+
+  </section>
+  <br/>
+  <a href="/logout?access_token=<%= accessToken %>">Log out</a>
+</main>
