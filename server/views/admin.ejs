@@ -1,4 +1,38 @@
+<script type="text/javascript">
+  function insertAdminUser(){
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        var response = JSON.parse(this.responseText);
+        document.getElementById("msg").innerHTML = response.msg;
+        document.getElementById("username").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("password").value = "";
+      }
+    };
+    xhttp.open("POST", "/registerAdmin", true);
+    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    var username = document.getElementById("username").value;
+    var email = document.getElementById("email").value;
+    var password = document.getElementById("password").value;
+    xhttp.send("username=" + username + "&email=" + email + "&password=" + password);
+  }
 
+  function revertPermission(id){
+    var access = document.getElementById("invert-"+id).innerHTML;
+    access  = ( access === "ALLOW" ) ? "DENY" : "ALLOW";
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("invert-"+id).innerHTML = access;
+      }
+    }
+    xhttp.open("PATCH", "http://localhost:3333/api/ACLs/" + id, true);
+    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.send("permission=" + access);
+  }
+
+</script>
 <main>
   <h1>Hola <%= email %>.</h1>
   <p>Su accessToken es: <%= accessToken %></p>
@@ -7,7 +41,7 @@
   <section>
     <legend>Crear nuevo usuario administrador</legend>
     <div>
-      <label for="number">Numero:</label>
+      <label for="number">Nombre:</label>
       <input type="text" id="username" value=""/>
     </div>
     <div>
@@ -22,8 +56,21 @@
     <div>
       <button onclick="insertAdminUser()"> Crear </button>
     </div>
-
+    <br>
+    <br>
+    <div id="msg">
+    </div>
   </section>
+  <br>
+  <section>
+    <legend>Acciones de clientes</legend>
+    <ul>
+    <% for( var i = 0; i < operations.length; i++ ){%>
+      <li><%=operations[i].property%> <%=operations[i].model%> <a href="#" id="invert-<%=operations[i].id%>" onclick="revertPermission(<%=operations[i].id%>)"> <%=operations[i].permission%></a> </li>
+    <%}%>
+    </ul>
+  </section>
+  <br>
   <br/>
   <a href="/logout?access_token=<%= accessToken %>">Log out</a>
 </main>

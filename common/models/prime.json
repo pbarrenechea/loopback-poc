@@ -1,0 +1,27 @@
+{
+  "name": "Prime",
+  "base": "Model",
+  "properties": {},
+  "validations": [],
+  "relations": {},
+  "methods": {
+    "isPrime": {
+      "accepts": [
+        {
+          "arg": "number",
+          "type": "string",
+          "http": {
+            "source": "query"
+          }
+        }
+      ],
+      "returns": {
+        "arg": "isPrime",
+        "type": "boolean"
+      },
+      "http": {
+        "verb": "get"
+      }
+    }
+  }
+}

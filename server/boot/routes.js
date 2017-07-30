@@ -30,10 +30,9 @@ module.exports = (app) => {
         let roleMapping = app.models.RoleMapping;
         roleMapping.create({
           'principalId': userInstance.id,
-          'roleId': roles.admin,
+          'roleId': roles.client,
           'principalType': 'user'
         }, (err, roleInstance) => {
-          "use strict";
           res.render('response', {
             title: (!err) ? 'Usuario creado con exito' : 'Hubo un problema creando el usuario',
             content: err,
@@ -44,6 +43,35 @@ module.exports = (app) => {
     });
   });
 
+  /**
+   * Register an admin
+   */
+  app.post('/registerAdmin', (req, res) => {
+    let user = app.models.user;
+    user.create({
+      email: req.body.email,
+      password: req.body.password,
+      username: req.body.username
+    }, (err, userInstance) => {
+      if( err ){
+        res.send({'msg' : "Problema creando el usuario"});
+        return;
+      }
+      let roleMapping = app.models.RoleMapping;
+      roleMapping.create({
+        'principalId': userInstance.id,
+        'roleId': roles.admin,
+        'principalType': 'user'
+      }, (err, roleInstance) => {
+          if(err){
+            user.delte(userInstance);
+            res.send({'msg': "Problema creando el usuario"});
+          }else{
+            res.send({'msg': "Usuario creado con exito"});
+          }
+      });
+    });
+  });
   /**
    * Logs a user
    */
@@ -74,15 +102,19 @@ module.exports = (app) => {
         return;
       }
       let user = app.models.user;
-      user.findOne({'email': req.body.email }, (err, responseUser) => {
-        let roleMapping = app.models.RoleMapping.findOne({
+      user.findOne({'where': {'email': req.body.email }}, (err, responseUser) => {
+        let roleMapping = app.models.RoleMapping.findOne({'where' :{
           'principalId': responseUser.id,
           'principalType': 'user'
-        }, (err, responseRole) => {
+        }}, (err, responseRole) => {
             if( responseRole.roleId === roles.admin ){
-              res.render('admin', {
-                'email': responseUser.email,
-                'accessToken': token.id
+              let acls = app.models.ACL;
+              acls.find({'where': {'principalId': 2}}, (err, acls)=> {
+                res.render('admin', {
+                  'email': responseUser.email,
+                  'accessToken': token.id,
+                  'operations': acls
+                });
               });
             }else{
               res.render('home', {
@@ -93,18 +125,6 @@ module.exports = (app) => {
         });
       });
     });
-  });
-
-  app.post('/isPrime', (req, res, next) => {
-    if( !req.body.access_token ) return res.sendStatus(401);
-    if( !req.body.number ){
-      res.send({'isPrime': false });
-    }else{
-      let num = req.body.number;
-      for(var i = 2; i < num; i++)
-        if(num % i === 0) res.send({'isPrime': false });
-          res.send({'isPrime' : (num !== 1) }) ;
-    }
   });
 
   //log a user out

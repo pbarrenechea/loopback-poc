@@ -7,11 +7,9 @@
         document.getElementById("msg").innerHTML = response.isPrime ? "Si" : "No`" ;
       }
     };
-    xhttp.open("POST", "/isPrime", true);
-    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     var newNumber = document.getElementById("number").value;
-    var accessToken = document.getElementById("access_token").value;
-    xhttp.send("access_token=" + accessToken + "&number=" + newNumber);
+    xhttp.open("GET", "http://localhost:3333/api/Primes/isPrime?number=" + newNumber, true);
+    xhttp.send();
   }
 </script>
 
